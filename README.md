@@ -1,4 +1,4 @@
-# 🦾 AEGNO
+#  AEGNO
 
 **AEGNO** is a blazing-fast, developer-friendly, and language-agnostic framework for building multi-agent systems. Built entirely in **Rust**, AEGNO allows developers to create intelligent agents with memory, reasoning, tools, and workflows — accessible from **Java, Rust**, and (soon) **Python, JS, Go**, and more.
 
@@ -17,7 +17,7 @@
 
 ---
 
-## 🧱 Architecture
+##  Architecture
 
 ```
            +----------------+
@@ -39,7 +39,7 @@
 
 ---
 
-## 🗂 File Structure (Rust Core)
+##  File Structure (Rust Core)
 
 ```
 aegno/
@@ -58,7 +58,7 @@ aegno/
 
 ---
 
-## ⚙️ Example: `agent.toml`
+##  Example: `agent.toml`
 
 ```toml
 [agent]
@@ -76,27 +76,27 @@ path = "data/memory.db"
 
 ---
 
-## 🛠 Usage
+##  Usage
 
-### 🚀 Run an Agent
+###  Run an Agent
 
 ```bash
 aegno run agent.toml
 ```
 
-### 🧰 Create a New Agent
+###  Create a New Agent
 
 ```bash
 aegno new summarizer
 ```
 
-### 🧠 Add a Tool
+###  Add a Tool
 
 ```bash
 aegno add-tool yfinance
 ```
 
-### 📡 Serve as API
+###  Serve as API
 
 ```bash
 aegno serve
@@ -104,7 +104,7 @@ aegno serve
 
 ---
 
-## ☕ Java SDK (Preview)
+##  Java SDK (Preview)
 
 ```java
 AgentClient client = new AgentClient("http://localhost:8080");
@@ -114,7 +114,7 @@ System.out.println(result);
 
 ---
 
-## 📡 REST / gRPC API
+##  REST / gRPC API
 
 | Endpoint | Description |
 |----------|-------------|
@@ -125,24 +125,3 @@ System.out.println(result);
 
 ---
 
-## 🔭 Roadmap
-
-- [x] Rust agent runtime
-- [x] CLI (`new`, `run`, `serve`)
-- [x] Java SDK
-- [ ] WebSocket streaming
-- [ ] Plugin marketplace
-- [ ] Python/JS SDKs
-- [ ] Cloud deployment support
-
----
-
-## 🏁 Mission
-
-> AEGNO is the **fastest**, most composable and language-friendly agent framework — built in Rust, designed for teams, and optimized for production-scale reasoning systems.
-
----
-
-## 🔗 License
-
-MIT
