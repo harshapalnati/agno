@@ -1,0 +1,5 @@
+# agent.toml
+name = "FinanceBot"
+model = "openai-mock"
+tools = ["math", "search"]
+instructions = "Answer financial queries using tools and reasoning."
