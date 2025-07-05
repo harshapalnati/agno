@@ -4,6 +4,8 @@ mod config;
 mod model;
 mod tool;
 mod memory;
+mod team;
+mod workflow;
 
 use agent::Agent;
 use clap::Parser;
@@ -13,6 +15,7 @@ use memory::sqlite::SqliteMemory;
 use model::openai::OpenAiClient;
 use std::sync::Arc;
 use tool::load_tools;
+use team::{Team, TeamDispatcher};
 
 #[tokio::main]
 async fn main() {
@@ -61,7 +64,72 @@ async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
 
             agent.run_loop().await;
         }
+        Commands::Team { config } => {
+            println!("🤝 Starting team with config file: {config}");
+            
+            // Load team configuration
+            let team_config = load_team_config(&config)?;
+            println!("✅ Loaded Team Config:\n{:#?}", team_config);
+            
+            // Create team dispatcher
+            let mut dispatcher = TeamDispatcher::new(team_config).await?;
+            
+            // Run team REPL
+            run_team_repl(&mut dispatcher).await;
+        }
     }
 
     Ok(())
+}
+
+/// Load team configuration from TOML file
+fn load_team_config(path: &str) -> Result<Team, Box<dyn std::error::Error>> {
+    let content = std::fs::read_to_string(path)?;
+    let team: Team = toml::from_str(&content)?;
+    Ok(team)
+}
+
+/// Run team REPL loop
+async fn run_team_repl(dispatcher: &mut TeamDispatcher) {
+    use std::io::{self, Write};
+
+    println!("\n🤝 Team '{}' is ready. Type input or 'exit' to quit.", "Team");
+    println!("Commands: /status, /agents, /workflow, /clear");
+
+    loop {
+        print!("team> ");
+        io::stdout().flush().unwrap();
+
+        let mut input = String::new();
+        if io::stdin().read_line(&mut input).is_err() {
+            println!("❌ Error reading input.");
+            continue;
+        }
+
+        let input = input.trim();
+        match input {
+            "exit" => {
+                println!("👋 Goodbye.");
+                break;
+            }
+            "/status" => {
+                println!("📊 Team Status: Active");
+            }
+            "/agents" => {
+                println!("👥 Team Agents: [List agents here]");
+            }
+            "/workflow" => {
+                println!("🔄 Current Workflow: [Show workflow type]");
+            }
+            "/clear" => {
+                println!("🧹 Team memory cleared.");
+            }
+            _ => {
+                match dispatcher.execute(input).await {
+                    Ok(result) => println!("✅ Result: {}", result),
+                    Err(err) => println!("❌ Error: {}", err),
+                }
+            }
+        }
+    }
 }

@@ -1,5 +1,5 @@
 use crate::memory::memory_trait::Memory;
-use crate::model::{model_trait::Message, Model};
+use crate::model::model_trait::{Message, Model};
 use crate::tool::tool_traits::Tool;
 
 use serde::Deserialize;
@@ -46,18 +46,22 @@ Otherwise, reply normally as a helpful assistant.
         println!("\n🟦 Input: {input}");
 
         // Load memory history
-        let mut prompt = format!("{}\n\n", self.instructions);
-        if let Ok(history) = self.memory.load_messages().await {
-            for (role, content, _) in history {
-                prompt.push_str(&format!("{}: {}\n", role, content));
-            }
-        }
+        let mut messages = self.memory.load().await;
 
-        // Append user message
-        prompt.push_str(&format!("User: {}\n", input));
+        // Add system instructions
+        messages.insert(0, Message {
+            role: "system".to_string(),
+            content: self.instructions.clone(),
+        });
+
+        // Add user input to messages
+        messages.push(Message {
+            role: "user".to_string(),
+            content: input.to_string(),
+        });
 
         // Get model response
-        let response = self.model.generate(&prompt).await;
+        let response = self.model.generate(messages).await;
         println!("🟨 Response: {}", response);
 
         // Store messages in memory
@@ -74,6 +78,41 @@ Otherwise, reply normally as a helpful assistant.
         }
 
         println!("✅ Agent finished.");
+    }
+
+    /// Process a single user input and return the assistant's response (with tool use if needed)
+    pub async fn run_once(&mut self, input: &str) -> String {
+        // Load memory history
+        let mut messages = self.memory.load().await;
+
+        // Add system instructions
+        messages.insert(0, Message {
+            role: "system".to_string(),
+            content: self.instructions.clone(),
+        });
+
+        // Add user input to messages
+        messages.push(Message {
+            role: "user".to_string(),
+            content: input.to_string(),
+        });
+
+        // Get model response
+        let response = self.model.generate(messages).await;
+        
+        // Store messages in memory
+        let _ = self.memory.store("user", input).await;
+        let _ = self.memory.store("assistant", &response).await;
+        
+        // Try to parse tool usage
+        match Self::parse_tool_call(&response) {
+            Some(tool_call) => {
+                // Actually invoke the tool and return its output
+                let tool_output = self.invoke_tool_return(tool_call).await;
+                tool_output
+            }
+            None => response,
+        }
     }
 
     /// REPL loop for continuous interaction
@@ -99,14 +138,10 @@ Otherwise, reply normally as a helpful assistant.
                     break;
                 }
                 "/memory" => {
-                    match self.memory.load_messages().await {
-                        Ok(history) => {
-                            println!("🧠 Memory:");
-                            for (role, content, ts) in history {
-                                println!("[{}] {}: {}", ts, role, content);
-                            }
-                        }
-                        Err(err) => println!("❌ Error loading memory: {}", err),
+                    let history = self.memory.load().await;
+                    println!("🧠 Memory:");
+                    for msg in history {
+                        println!("[{}] {}: {}", "timestamp", msg.role, msg.content);
                     }
                 }
                 "/clear" => {
@@ -147,6 +182,22 @@ Otherwise, reply normally as a helpful assistant.
                     .memory
                     .store("assistant", &format!("⚠️ Unknown tool: {}", call.name))
                     .await;
+            }
+        }
+    }
+
+    /// Invoke the appropriate tool and return its output as a string
+    async fn invoke_tool_return(&mut self, call: ToolCall) -> String {
+        match self.tools.iter().find(|t| t.name() == call.name) {
+            Some(tool) => {
+                let output = tool.call(&call.args).await;
+                let _ = self.memory.store("tool", &format!("{} → {}", tool.name(), output)).await;
+                output
+            }
+            None => {
+                let msg = format!("⚠️ Unknown tool: {}", call.name);
+                let _ = self.memory.store("assistant", &msg).await;
+                msg
             }
         }
     }

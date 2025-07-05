@@ -1,0 +1,26 @@
+# Team configuration for AEGNO
+name = "FinanceTeam"
+shared_memory = "team_memory.db"
+workflow = "ChainOfThought"
+
+# Team members
+[[agents]]
+name = "researcher"
+role = "Data Researcher"
+instructions = "Research financial data and market trends. Use search tools to gather information."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "analyst"
+role = "Financial Analyst"
+instructions = "Analyze financial data and perform calculations. Use math tools for analysis."
+tools = ["math", "search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "reporter"
+role = "Report Writer"
+instructions = "Write clear, concise reports based on research and analysis. Focus on actionable insights."
+tools = ["search"]
+model = "openai:gpt-4-turbo" 

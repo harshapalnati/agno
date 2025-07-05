@@ -16,6 +16,12 @@ pub enum Commands {
         #[arg(short, long, default_value = "agent.toml")]
         config: String,
     },
+    /// Run a team of agents using a configuration file
+    Team {
+        /// Path to the team config TOML file
+        #[arg(short, long, default_value = "team.toml")]
+        config: String,
+    },
 }
 
 /// Main dispatcher function
@@ -31,6 +37,12 @@ pub async fn run_cli() {
             // let agent = load_agent(&config).await?;
             // agent.run_loop().await;
 
+            // Placeholder only
+        }
+        Commands::Team { config } => {
+            println!("🤝 Running team with config: {}", config);
+
+            // TODO: Integrate actual team loading here
             // Placeholder only
         }
     }

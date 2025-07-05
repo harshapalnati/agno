@@ -9,7 +9,8 @@
 - ⚡ **Rust Core** – Fully async, memory-safe, and ultra-performant
 - ⚙️ **Modular & Pluggable** – Add tools, models, workflows via trait-based architecture
 - 🌍 **Language Agnostic** – Exposes agents via gRPC/HTTP for cross-language use
-- 🛠️ **CLI-First Developer Experience** – `aegno run agent.toml` in seconds
+- 🛠️ **CLI-First Developer Experience** – `helixor run agent.toml` in seconds
+- 🤝 **Team Collaboration** – Multiple agents working together with different workflows
 - 🧠 **Reasoning & Workflows** – Supports Chain-of-Thought, FSMs, DAGs
 - 🧩 **Structured Memory** – Built-in support for SQLite, Redis, Qdrant
 - 📡 **API Ready** – Axum-powered REST & gRPC endpoints
@@ -58,7 +59,9 @@ aegno/
 
 ---
 
-## ⚙️ Example: `agent.toml`
+## ⚙️ Examples
+
+### Single Agent: `agent.toml`
 
 ```toml
 [agent]
@@ -74,6 +77,37 @@ backend = "sqlite"
 path = "data/memory.db"
 ```
 
+### Team of Agents: `team.toml`
+
+```toml
+name = "FinanceTeam"
+shared_memory = "team_memory.db"
+
+[[agents]]
+name = "researcher"
+role = "Data Researcher"
+instructions = "Research financial data and market trends."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "analyst"
+role = "Financial Analyst"
+instructions = "Analyze financial data and perform calculations."
+tools = ["math", "search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "reporter"
+role = "Report Writer"
+instructions = "Write clear, concise reports with actionable insights."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[workflow]
+type = "ChainOfThought"
+```
+
 ---
 
 ## 🛠 Usage
@@ -81,25 +115,31 @@ path = "data/memory.db"
 ### 🚀 Run an Agent
 
 ```bash
-aegno run agent.toml
+helixor run agent.toml
+```
+
+### 🤝 Run a Team
+
+```bash
+helixor team team.toml
 ```
 
 ### 🧰 Create a New Agent
 
 ```bash
-aegno new summarizer
+helixor new summarizer
 ```
 
 ### 🧠 Add a Tool
 
 ```bash
-aegno add-tool yfinance
+helixor add-tool yfinance
 ```
 
 ### 📡 Serve as API
 
 ```bash
-aegno serve
+helixor serve
 ```
 
 ---

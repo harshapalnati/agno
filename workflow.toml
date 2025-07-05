@@ -1,0 +1,108 @@
+# Workflow configuration examples
+
+# Chain of Thought Workflow
+[chain_of_thought]
+name = "Financial Analysis"
+description = "Research → Analyze → Report workflow"
+
+[[chain_of_thought.steps]]
+name = "Research"
+description = "Gather market data and company information"
+agent = "researcher"
+tools = ["search"]
+
+[[chain_of_thought.steps]]
+name = "Analysis"
+description = "Perform financial calculations and analysis"
+agent = "analyst"
+tools = ["math", "search"]
+
+[[chain_of_thought.steps]]
+name = "Reporting"
+description = "Create final report with recommendations"
+agent = "reporter"
+tools = ["search"]
+
+# FSM Workflow Example
+[fsm_example]
+name = "Customer Support"
+description = "Finite State Machine for customer issue resolution"
+
+states = ["receive", "analyze", "resolve", "verify", "close"]
+initial_state = "receive"
+
+[[fsm_example.transitions]]
+from = "receive"
+to = "analyze"
+condition = "issue_received"
+
+[[fsm_example.transitions]]
+from = "analyze"
+to = "resolve"
+condition = "analysis_complete"
+
+[[fsm_example.transitions]]
+from = "resolve"
+to = "verify"
+condition = "resolution_attempted"
+
+[[fsm_example.transitions]]
+from = "verify"
+to = "close"
+condition = "customer_satisfied"
+
+[[fsm_example.transitions]]
+from = "verify"
+to = "resolve"
+condition = "customer_unsatisfied"
+
+# DAG Workflow Example
+[dag_example]
+name = "Software Development"
+description = "Parallel development workflow"
+
+[[dag_example.nodes]]
+id = "planning"
+agent = "product_manager"
+task = "Define requirements and create project plan"
+
+[[dag_example.nodes]]
+id = "frontend"
+agent = "frontend_dev"
+task = "Develop user interface"
+
+[[dag_example.nodes]]
+id = "backend"
+agent = "backend_dev"
+task = "Develop API and database"
+
+[[dag_example.nodes]]
+id = "testing"
+agent = "qa_engineer"
+task = "Test the complete application"
+
+[[dag_example.nodes]]
+id = "deployment"
+agent = "devops"
+task = "Deploy to production"
+
+[[dag_example.edges]]
+from = "planning"
+to = "frontend"
+
+[[dag_example.edges]]
+from = "planning"
+to = "backend"
+
+[[dag_example.edges]]
+from = "frontend"
+to = "testing"
+
+[[dag_example.edges]]
+from = "backend"
+to = "testing"
+
+[[dag_example.edges]]
+from = "testing"
+to = "deployment"
+condition = "tests_passed" 

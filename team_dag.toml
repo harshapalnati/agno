@@ -1,0 +1,103 @@
+# DAG Team Configuration - Software Development Workflow
+name = "SoftwareDevTeam"
+shared_memory = "team_dag_memory.db"
+workflow = "DAG"
+
+# DAG Configuration
+[dag]
+nodes = [
+    { id = "requirements", agent = "analyst", task = "Gather and analyze requirements" },
+    { id = "design", agent = "architect", task = "Create system design and architecture" },
+    { id = "frontend", agent = "frontend_dev", task = "Develop frontend components" },
+    { id = "backend", agent = "backend_dev", task = "Develop backend services" },
+    { id = "database", agent = "db_admin", task = "Design and implement database schema" },
+    { id = "integration", agent = "devops", task = "Integrate frontend and backend" },
+    { id = "testing", agent = "tester", task = "Perform comprehensive testing" },
+    { id = "deployment", agent = "devops", task = "Deploy to production" }
+]
+
+[[dag.edges]]
+from = "requirements"
+to = "design"
+
+[[dag.edges]]
+from = "design"
+to = "frontend"
+
+[[dag.edges]]
+from = "design"
+to = "backend"
+
+[[dag.edges]]
+from = "design"
+to = "database"
+
+[[dag.edges]]
+from = "frontend"
+to = "integration"
+
+[[dag.edges]]
+from = "backend"
+to = "integration"
+
+[[dag.edges]]
+from = "database"
+to = "integration"
+
+[[dag.edges]]
+from = "integration"
+to = "testing"
+
+[[dag.edges]]
+from = "testing"
+to = "deployment"
+
+# Team members
+[[agents]]
+name = "analyst"
+role = "Requirements Analyst"
+instructions = "Gather and analyze software requirements from stakeholders. Create detailed specifications."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "architect"
+role = "System Architect"
+instructions = "Design system architecture and create technical specifications based on requirements."
+tools = ["search", "math"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "frontend_dev"
+role = "Frontend Developer"
+instructions = "Develop user interface components and frontend functionality."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "backend_dev"
+role = "Backend Developer"
+instructions = "Develop server-side logic, APIs, and business logic."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "db_admin"
+role = "Database Administrator"
+instructions = "Design database schema and implement data storage solutions."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "devops"
+role = "DevOps Engineer"
+instructions = "Handle system integration, deployment, and infrastructure management."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "tester"
+role = "Quality Assurance Tester"
+instructions = "Perform comprehensive testing including unit, integration, and user acceptance testing."
+tools = ["search"]
+model = "openai:gpt-4-turbo" 

@@ -1,0 +1,70 @@
+# FSM Team Configuration - Customer Support Workflow
+name = "CustomerSupportTeam"
+shared_memory = "team_fsm_memory.db"
+workflow = "FSM"
+
+# FSM Configuration
+[fsm]
+states = ["receive", "analyze", "resolve", "verify", "close"]
+initial_state = "receive"
+
+[[fsm.transitions]]
+from = "receive"
+to = "analyze"
+condition = "issue_received"
+
+[[fsm.transitions]]
+from = "analyze"
+to = "resolve"
+condition = "analysis_complete"
+
+[[fsm.transitions]]
+from = "resolve"
+to = "verify"
+condition = "resolution_attempted"
+
+[[fsm.transitions]]
+from = "verify"
+to = "close"
+condition = "customer_satisfied"
+
+[[fsm.transitions]]
+from = "verify"
+to = "resolve"
+condition = "customer_unsatisfied"
+
+# Team members - names now match state names
+[[agents]]
+name = "receive"
+role = "Issue Receptionist"
+instructions = "Receive and categorize customer issues. Be polite and gather initial information. When you receive an issue, acknowledge it and categorize it appropriately."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "analyze"
+role = "Issue Analyst"
+instructions = "Analyze the issue details and determine the root cause and severity. Provide a detailed analysis of the problem."
+tools = ["search", "math"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "resolve"
+role = "Issue Resolver"
+instructions = "Provide solutions and attempt to resolve the customer issue. Offer practical solutions and steps to fix the problem."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "verify"
+role = "Solution Verifier"
+instructions = "Verify that the solution works and check customer satisfaction. Confirm if the solution is working and if the customer is satisfied."
+tools = ["search"]
+model = "openai:gpt-4-turbo"
+
+[[agents]]
+name = "close"
+role = "Case Closer"
+instructions = "Close the case and provide final summary to the customer. Give a final summary and close the support ticket."
+tools = ["search"]
+model = "openai:gpt-4-turbo" 
