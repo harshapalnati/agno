@@ -1,4 +1,6 @@
 use clap::{Parser, Subcommand};
+use crate::deploy;
+use crate::deploy::server;
 
 /// CLI entrypoint for Helixor/AEGNO
 #[derive(Parser)]
@@ -20,6 +22,36 @@ pub enum Commands {
     Team {
         /// Path to the team config TOML file
         #[arg(short, long, default_value = "team.toml")]
+        config: String,
+    },
+    /// Deploy an agent or team to Docker and get a URL
+    Deploy {
+        /// Path to the config file (agent.toml or team.toml)
+        #[arg(short, long)]
+        config: String,
+        /// HTTP port to expose the agent on (default: 8080)
+        #[arg(short, long, default_value = "8080")]
+        port: u16,
+        /// gRPC port to expose the agent on (optional)
+        #[arg(long)]
+        grpc_port: Option<u16>,
+        /// Container name (default: auto-generated)
+        #[arg(long)]
+        name: Option<String>,
+        /// Docker image tag (default: latest)
+        #[arg(long, default_value = "latest")]
+        tag: String,
+    },
+    /// Start HTTP/gRPC server for deployed agent
+    Serve {
+        /// HTTP port to serve on (default: 8080)
+        #[arg(short, long, default_value = "8080")]
+        port: u16,
+        /// gRPC port to serve on (optional)
+        #[arg(long)]
+        grpc_port: Option<u16>,
+        /// Path to agent config file
+        #[arg(short, long, default_value = "agent.toml")]
         config: String,
     },
 }
@@ -44,6 +76,30 @@ pub async fn run_cli() {
 
             // TODO: Integrate actual team loading here
             // Placeholder only
+        }
+        Commands::Deploy { config, port, grpc_port, name, tag } => {
+            println!("🚀 Deploying with config: {}", config);
+            println!("🌐 HTTP port: {}", port);
+            if let Some(grpc_port) = grpc_port {
+                println!("🔌 gRPC port: {}", grpc_port);
+            }
+            
+            // Deploy the agent/team
+            if let Err(e) = deploy::deploy_agent(&config, port, name, tag).await {
+                eprintln!("❌ Deployment failed: {}", e);
+            }
+        }
+        Commands::Serve { port, grpc_port, config } => {
+            println!("🌐 Starting server with config: {}", config);
+            println!("🌐 HTTP port: {}", port);
+            if let Some(grpc_port) = grpc_port {
+                println!("🔌 gRPC port: {}", grpc_port);
+            }
+            
+            // Start the HTTP/gRPC server
+            if let Err(e) = server::start_server_from_config(&config, port, grpc_port).await {
+                eprintln!("❌ Server failed to start: {}", e);
+            }
         }
     }
 }

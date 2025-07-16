@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package helixor;
+
+service AgentService {
+  rpc Chat(ChatRequest) returns (ChatResponse);
+  rpc Health(HealthRequest) returns (HealthResponse);
+  rpc Status(StatusRequest) returns (StatusResponse);
+}
+
+message ChatRequest {
+  string message = 1;
+  string session_id = 2;
+}
+
+message ChatResponse {
+  string response = 1;
+  string session_id = 2;
+  string timestamp = 3;
+}
+
+message HealthRequest {}
+message HealthResponse {
+  string status = 1;
+  string agent_name = 2;
+  uint64 uptime = 3;
+}
+
+message StatusRequest {}
+message StatusResponse {
+  string name = 1;
+  string status = 2;
+  string memory_backend = 3;
+  uint32 tools_available = 4;
+} 

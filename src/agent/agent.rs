@@ -14,6 +14,76 @@ pub struct Agent {
     pub memory: Arc<dyn Memory + Send + Sync>,
 }
 
+/// Builder for creating Agent instances with a fluent API
+pub struct AgentBuilder {
+    name: String,
+    instructions: Option<String>,
+    model: Option<Box<dyn Model + Send + Sync>>,
+    tools: Vec<Box<dyn Tool + Send + Sync>>,
+    memory: Option<Arc<dyn Memory + Send + Sync>>,
+}
+
+impl AgentBuilder {
+    /// Create a new AgentBuilder with the given name
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            instructions: None,
+            model: None,
+            tools: Vec::new(),
+            memory: None,
+        }
+    }
+
+    /// Set the instructions for the agent
+    pub fn with_instructions(mut self, instructions: impl Into<String>) -> Self {
+        self.instructions = Some(instructions.into());
+        self
+    }
+
+    /// Set the model for the agent
+    pub fn with_model(mut self, model: Box<dyn Model + Send + Sync>) -> Self {
+        self.model = Some(model);
+        self
+    }
+
+    /// Add a tool to the agent
+    pub fn with_tool(mut self, tool: Box<dyn Tool + Send + Sync>) -> Self {
+        self.tools.push(tool);
+        self
+    }
+
+    /// Add multiple tools to the agent
+    pub fn with_tools(mut self, tools: Vec<Box<dyn Tool + Send + Sync>>) -> Self {
+        self.tools.extend(tools);
+        self
+    }
+
+    /// Set the memory for the agent
+    pub fn with_memory(mut self, memory: Arc<dyn Memory + Send + Sync>) -> Self {
+        self.memory = Some(memory);
+        self
+    }
+
+    /// Build the Agent
+    pub fn build(self) -> Agent {
+        let instructions = self.instructions.unwrap_or_else(|| {
+            "You are a helpful assistant.".to_string()
+        });
+        
+        let model = self.model.expect("Model must be provided");
+        let memory = self.memory.expect("Memory must be provided");
+
+        Agent::new(
+            self.name,
+            instructions,
+            model,
+            self.tools,
+            memory,
+        )
+    }
+}
+
 impl Agent {
     /// Create a new agent with model, tools, and memory
     pub fn new(
