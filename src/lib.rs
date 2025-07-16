@@ -39,6 +39,7 @@ pub use model::{Model, OpenAiClient};
 pub use team::{Team, TeamBuilder, TeamAgent, TeamWorkflow, FSMConfig, DAGConfig};
 pub use tool::{ToolRegistry};
 pub use tool::tool_traits::Tool;
+pub use deploy::{deploy_agent_instance, deploy_team_instance};
 
 // Re-export common traits
 pub use async_trait::async_trait;

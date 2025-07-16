@@ -3,6 +3,9 @@ pub mod server;
 use std::process::Command;
 use uuid::Uuid;
 
+use crate::agent::Agent;
+use crate::team::Team;
+
 /// Deploy an agent or team to Docker and start HTTP server
 pub async fn deploy_agent(
     _config_path: &str,
@@ -33,6 +36,24 @@ pub async fn deploy_agent(
     println!("📊 Health check: {}/health", url);
     
     Ok(url)
+}
+
+/// Deploy an Agent instance (programmatic, no TOML)
+pub async fn deploy_agent_instance(
+    agent: Agent,
+    http_port: u16,
+    grpc_port: Option<u16>,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    server::start_agent_server(agent, http_port, grpc_port).await
+}
+
+/// Deploy a Team instance (programmatic, no TOML)
+pub async fn deploy_team_instance(
+    team: Team,
+    http_port: u16,
+    grpc_port: Option<u16>,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    server::start_team_server(team, http_port, grpc_port).await
 }
 
 /// Build Docker image

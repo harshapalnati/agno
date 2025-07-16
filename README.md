@@ -433,3 +433,76 @@ MIT
 5. **Plugin System** - Dynamic tool loading
 
 Your multi-agent framework is now ready to use! 🎯
+
+---
+
+## 🚦 Programmatic Deployment (No TOML Required)
+
+You can deploy agents and teams directly from Rust code using the Helixor library—no config files needed!
+
+### Deploy an Agent from Code
+
+```rust
+use helixor::{AgentBuilder, OpenAiClient, SqliteMemory, ToolRegistry, deploy_agent_instance};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let api_key = std::env::var("OPENAI_API_KEY")?;
+    let tools = ToolRegistry::new();
+
+    let agent = AgentBuilder::new("MyAgent")
+        .with_instructions("You are a helpful assistant.")
+        .with_model(OpenAiClient::new(api_key))
+        .with_memory(SqliteMemory::new("memory.db")?)
+        .with_tools(tools)
+        .build();
+
+    // Deploy the agent (starts HTTP/gRPC server)
+    deploy_agent_instance(agent, 8080, Some(9090)).await?;
+
+    Ok(())
+}
+```
+
+### Deploy a Team from Code
+
+```rust
+use helixor::{TeamBuilder, TeamAgent, TeamWorkflow, deploy_team_instance};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let researcher = TeamAgent {
+        name: "Researcher".to_string(),
+        role: "Research Specialist".to_string(),
+        instructions: "Research and gather information.".to_string(),
+        tools: vec!["search".to_string()],
+        model: "openai".to_string(),
+    };
+
+    let analyst = TeamAgent {
+        name: "Analyst".to_string(),
+        role: "Financial Analyst".to_string(),
+        instructions: "Analyze financial data and perform calculations.".to_string(),
+        tools: vec!["math".to_string(), "search".to_string()],
+        model: "openai".to_string(),
+    };
+
+    let writer = TeamAgent {
+        name: "Writer".to_string(),
+        role: "Report Writer".to_string(),
+        instructions: "Write a summary report.".to_string(),
+        tools: vec![],
+        model: "openai".to_string(),
+    };
+
+    let team = TeamBuilder::new("ResearchTeam")
+        .with_agent(researcher)
+        .with_agent(analyst)
+        .with_agent(writer)
+        .with_workflow(TeamWorkflow::ChainOfThought)
+        .build();
+
+    deploy_team_instance(team, 8081, None).await?;
+    Ok(())
+}
+```

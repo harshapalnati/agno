@@ -163,3 +163,35 @@ async fn get_status(
         "tools_available": agent.tools.len()
     }))
 } 
+
+/// Start server for a programmatically constructed Agent
+pub async fn start_agent_server(
+    agent: Agent,
+    http_port: u16,
+    grpc_port: Option<u16>,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let agent = Arc::new(Mutex::new(agent));
+    if let Some(grpc_port) = grpc_port {
+        let http_agent = agent.clone();
+        let grpc_agent = agent.clone();
+        let http_future = start_server(http_agent, http_port);
+        let grpc_future = crate::grpc::start_grpc_server(grpc_agent, grpc_port);
+        tokio::try_join!(http_future, grpc_future)?;
+    } else {
+        start_server(agent, http_port).await?;
+    }
+    Ok(())
+}
+
+// Placeholder for Team server (to be implemented as needed)
+use crate::team::Team;
+
+pub async fn start_team_server(
+    _team: Team,
+    _http_port: u16,
+    _grpc_port: Option<u16>,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    // TODO: Implement team server logic
+    println!("[helixor] Team server deployment is not yet implemented.");
+    Ok(())
+} 
